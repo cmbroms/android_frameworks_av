@@ -476,7 +476,10 @@ bool AudioPlayer::reachedEOS(status_t *finalStatus) {
 
 void AudioPlayer::notifyAudioEOS() {
     ALOGV("AudioPlayer@0x%p notifyAudioEOS", this);
-
+    if (useOffload()) {
+        mPositionTimeRealUs = getOutputPlayPositionUs_l ();
+        ALOGV("notifyAudioEOS: mPositionTimeRealUs = %lld ",mPositionTimeRealUs);
+    }
     if (mObserver != NULL) {
         mObserver->postAudioEOS(0);
         ALOGV("Notified observer of EOS!");
@@ -920,8 +923,8 @@ int64_t AudioPlayer::getMediaTimeUs() {
     }
 
     int64_t realTimeOffset = getRealTimeUsLocked() - mPositionTimeRealUs;
-    if (realTimeOffset < 0) {
-        realTimeOffset = 0;
+    if (mPositionTimeMediaUs + realTimeOffset < 0) {
+        return 0;
     }
 
     return mPositionTimeMediaUs + realTimeOffset;
