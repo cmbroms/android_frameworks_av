@@ -23,7 +23,8 @@
 #include "ARawAudioAssembler.h"
 #include "ASessionDescription.h"
 
-#include "avc_utils.h"
+#include "include/avc_utils.h"
+#include "include/ExtendedUtils.h"
 
 #include <ctype.h>
 
@@ -197,7 +198,7 @@ static sp<ABuffer> MakeAVCCodecSpecificData(
         out += nal->size();
 
         if (i == 0) {
-            FindAVCDimensions(nal, width, height);
+            FindAVCDimensions(nal, width, height, NULL);
             ALOGI("dimensions %dx%d", *width, *height);
         }
     }
@@ -536,6 +537,8 @@ APacketSource::APacketSource(
             mInitCheck = ERROR_UNSUPPORTED;
             return;
         }
+
+        ExtendedUtils::updateVideoTrackInfoFromESDS_MPEG4Video(mFormat);
 
         mFormat->setInt32(kKeyWidth, width);
         mFormat->setInt32(kKeyHeight, height);
