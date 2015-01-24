@@ -4562,8 +4562,7 @@ audio_devices_t AudioPolicyManager::getNewOutputDevice(audio_io_handle_t output,
                 && (!primaryOutputDesc->isStrategyActive(STRATEGY_MEDIA)))) {
         device = getDeviceForStrategy(STRATEGY_SONIFICATION, fromCache);
     } else if (outputDesc->isStrategyActive(STRATEGY_SONIFICATION_RESPECTFUL) ||
-                (primaryOutputDesc->isStrategyActive(STRATEGY_SONIFICATION_RESPECTFUL)
-                && (!primaryOutputDesc->isStrategyActive(STRATEGY_MEDIA)))) {
+               primaryOutputDesc->isStrategyActive(STRATEGY_SONIFICATION_RESPECTFUL)) {
         device = getDeviceForStrategy(STRATEGY_SONIFICATION_RESPECTFUL, fromCache);
     } else if (outputDesc->isStrategyActive(STRATEGY_MEDIA)) {
         device = getDeviceForStrategy(STRATEGY_MEDIA, fromCache);
@@ -5963,7 +5962,7 @@ status_t AudioPolicyManager::checkAndSetVolume(audio_stream_type_t stream,
         }
 
         if (voiceVolume != mLastVoiceVolume && ((output == mPrimaryOutput) ||
-            isDirectOutput(output))) {
+            isDirectOutput(output) || device & AUDIO_DEVICE_OUT_ALL_USB)) {
             mpClientInterface->setVoiceVolume(voiceVolume, delayMs);
             mLastVoiceVolume = voiceVolume;
         }

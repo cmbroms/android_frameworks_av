@@ -82,6 +82,9 @@ struct NuPlayer : public AHandler {
 
     int64_t getServerTimeoutUs();
 
+    void suspendAsync();
+    void resumeFromSuspendedAsync();
+
     static const size_t kAggregateBufferSizeBytes;
 
 protected:
@@ -99,6 +102,7 @@ private:
     struct CCDecoder;
     struct GenericSource;
     struct HTTPLiveSource;
+    struct HTTPLiveSourceCustom;
     struct Renderer;
     struct RTSPSource;
     struct StreamingSource;
@@ -130,6 +134,8 @@ private:
         kWhatGetTrackInfo               = 'gTrI',
         kWhatGetSelectedTrack           = 'gSel',
         kWhatSelectTrack                = 'selT',
+        kWhatSuspend                    = 'susp',
+        kWhatResumeFromSuspended        = 'refs',
     };
     sp<PlayerExtendedStats> mPlayerExtendedStats;
 
@@ -143,6 +149,7 @@ private:
     sp<Decoder> mVideoDecoder;
     bool mVideoIsAVC;
     bool mOffloadAudio;
+    bool mOffloadDecodedPCM;
     bool mIsStreaming;
     sp<Decoder> mAudioDecoder;
     sp<CCDecoder> mCCDecoder;
@@ -199,6 +206,11 @@ private:
     bool mBuffering;
     bool mPlaying;
 
+    bool mImageShowed;
+
+    bool mSkipAudioFlushAfterSuspend;
+    bool mSkipVideoFlushAfterSuspend;
+
     inline const sp<Decoder> &getDecoder(bool audio) {
         return audio ? mAudioDecoder : mVideoDecoder;
     }
@@ -246,6 +258,9 @@ private:
     void performReset();
     void performScanSources();
     void performSetSurface(const sp<NativeWindowWrapper> &wrapper);
+
+    void performSuspend();
+    void performResumeFromSuspended();
 
     void onSourceNotify(const sp<AMessage> &msg);
     void onClosedCaptionNotify(const sp<AMessage> &msg);
